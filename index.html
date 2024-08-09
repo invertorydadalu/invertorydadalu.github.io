@@ -109,8 +109,8 @@
 }
     </style>
     <script>
-        const http = 'https://';
-        const url = "udp.nguyenthanhdat.top";
+        const http = 'http://';
+        const url = "127.0.0.1";
         function convertTimeStamp(data) {
     const date = new Date(data);
     const currentDate = new Date();
@@ -304,7 +304,12 @@ function formatNumber(number) {
                         const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
                         const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
                         const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
-                        const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        if(item.admin == "admin1"){
+                            const BarGold = item.msg || "";
+                        } else {
+                            const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
+                       
 
                         ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
                         ifITEM.appendChild(ifITEM_str);
@@ -481,7 +486,11 @@ function formatNumber(number) {
                         const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
                         const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
                         const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
-                        const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        if(item.admin == "admin1"){
+                            const BarGold = item.msg || "";
+                        } else {
+                            const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
                         ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
                         ifITEM.appendChild(ifITEM_str);
                         tr.appendChild(ifITEM);
@@ -556,7 +565,11 @@ function formatNumber(number) {
                         const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
                         const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
                         const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
-                        const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        if(item.admin == "admin1"){
+                            const BarGold = item.msg || "";
+                        } else {
+                            const BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
                         ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
                         ifITEM.appendChild(ifITEM_str);
                         tr.appendChild(ifITEM);
