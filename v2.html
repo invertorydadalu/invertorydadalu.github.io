@@ -1,0 +1,790 @@
+
+{v2.0}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Page</title>
+    <!-- Include SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://invertorydadalu.github.io/sweetalert2.min.css">
+    <script src="https://invertorydadalu.github.io/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://invertorydadalu.github.io/styles.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.css" />
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+</head>
+
+<body class="" style="padding-right: 0px;">
+    <div class="col-xl-3 col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-md-5 col-12 my-2 mb-1">
+                    <div class="ms-2">
+                        Số Dư:
+                        <h4 class="mb-0"><i class="fa fa-usd" aria-hidden="true"></i><strong id="getMONEY">{0}</strong></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+.tab-button {
+    margin-right: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.tab-button:hover {
+    background-color: #ddd;
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Phong cách cho nội dung của tab */
+.tab-content {
+    display: none; /* Ẩn nội dung mặc định */
+    padding: 15px;
+    margin-top: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Phong cách cho container của các tab */
+.tab-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Căn chỉnh các tab nút và nội dung */
+#tabsContainer, #contentContainer {
+    width: 100%;
+    margin: 10px 0;
+}
+
+/* Đảm bảo nội dung chi tiết thanh toán hiển thị đẹp mắt */
+.payment-details {
+    font-family: Arial, sans-serif;
+}
+
+.form-group {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.form-group span {
+    color: #333;
+}
+    </style>
+    <script>
+        const http = 'https://';
+        const url = "abcbbblll01.click";
+        function convertTimeStamp(data) {
+    const date = new Date(data);
+    const currentDate = new Date();
+
+    const secondsDiff = Math.floor((currentDate - date) / 1000);
+    if (secondsDiff < 60) {
+        return `${secondsDiff} Giây`;
+    }
+
+    const minutesDiff = Math.floor(secondsDiff / 60);
+    if (minutesDiff < 60) {
+        return `${minutesDiff} Phút`;
+    }
+
+    const hoursDiff = Math.floor(minutesDiff / 60);
+    if (hoursDiff < 24) {
+        return `${hoursDiff} Giờ`;
+    }
+
+    const daysDiff = Math.floor(hoursDiff / 24);
+    if (daysDiff < 30) {
+        return `${daysDiff} Ngày`;
+    }
+
+    const monthsDiff = Math.floor(daysDiff / 30);
+    if (monthsDiff < 12) {
+        return `${monthsDiff} Tháng`;
+    }
+
+    const yearsDiff = Math.floor(monthsDiff / 12);
+    return `${yearsDiff} Năm`;
+}
+function showTab(index) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.getElementById(`tab-${index}`).style.display = 'block';
+}
+function formatNumber(number) {
+    // Check if number is valid and numeric
+    if (typeof number !== 'number' || isNaN(number)) {
+        return ''; // Handle gracefully if number is not valid
+    }
+
+    // Format the number based on its magnitude
+    if (number >= 1000000000) {
+        return (number / 1000000000).toFixed(1).replace(/\.0$/, '') + ' B';
+    } else if (number >= 1000000) {
+        return (number / 1000000).toFixed(1).replace(/\.0$/, '') + ' M';
+    } else if (number >= 1000) {
+        return (number / 1000).toFixed(1).replace(/\.0$/, '') + ' K';
+    } else {
+        return number.toString() + ' K';
+    }
+}
+        async function CURL(path, data = {}, method = 'GET') {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (method !== 'GET') {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${http}${url}/${path}`, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const jsonResponse = await response.json();
+                return jsonResponse;
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+
+        async function getINFO_USER(){
+            const getINFO_USER = await CURL('api/INFO_USER', {
+                authorization: localStorage.getItem('JWT')
+            }, 'POST');
+            if(!getINFO_USER.type){
+                if (localStorage.getItem("JWT")) {
+                    localStorage.removeItem("JWT");
+                    console.log("JWT đã được xóa khỏi localStorage.");
+                } else {
+                    console.log("JWT không tồn tại trong localStorage.");
+                }
+                CARD_LOGIN();
+            } else {
+                document.getElementById('getMONEY').innerText = '';
+                document.getElementById('getMONEY').innerText = getINFO_USER.data.amount.toLocaleString('vi-VN');
+            }
+        }
+        function msg(type, msg) {
+            new Notify({
+                status: type ? 'success' : 'error',
+                title: 'Notification',
+                text: msg,
+                effect: 'fade',
+                speed: 300,
+                customClass: '',
+                customIcon: '',
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 2000,
+                notificationsGap: null,
+                notificationsPadding: null,
+                type: 'outline',
+                position: 'right top',
+                customWrapper: '',
+            });
+        }
+        const loading = (action) => {
+            if (!action) {
+                return Swal.close();
+            }
+            Swal.fire({
+                title: 'Đang tải...',
+                text: 'Vui lòng chờ',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        };
+        document.addEventListener('DOMContentLoaded', async function() {
+                const root = document.createElement('div');
+                root.id = "root";
+                // Append the div to the body
+                document.body.appendChild(root);
+
+                const rowLIST = document.createElement('div');
+                rowLIST.classList = "card card-body";
+                root.appendChild(rowLIST);
+                const title = document.createElement('div');
+                title.classList = "card-header";
+                rowLIST.appendChild(title);
+                const title01 = document.createElement('div');
+                title01.classList = "d-flex justify-content-between align-items-center";
+                title.appendChild(title01);
+                const title02 = document.createElement('div');
+                title02.innerHTML = ' <h5 class="mb-0">[CARD INFO]  : </h5>';
+                title01.appendChild(title02);
+
+                const CLICK_01 = document.createElement('h4');
+                CLICK_01.classList = "btn btn-sm btn-success";
+                CLICK_01.innerHTML = `<strong> {List Time} </strong>`;
+                CLICK_01.addEventListener('click', async() => {
+                    loading(true);
+                    const resultDATA = await CURL('api/01', {
+                        authorization: localStorage.getItem('JWT')
+                    }, 'POST');
+                    if (!resultDATA.type) {
+                        loading(false);
+                        if (localStorage.getItem("JWT")) {
+                            localStorage.removeItem("JWT");
+                            console.log("JWT đã được xóa khỏi localStorage.");
+                        } else {
+                            console.log("JWT không tồn tại trong localStorage.");
+                        }
+                        CARD_LOGIN();
+                        return msg(resultDATA.type, resultDATA.msg);
+                    }
+                    document.querySelector('tbody.rowUSER').innerHTML = ``;
+                    let STT = 0;
+                    resultDATA.data.sort((a, b) => b.timeNOW - a.timeNOW);
+                    resultDATA.data.forEach(item => {
+                        // Tạo phần tử tr
+                        const tr = document.createElement('tr');
+
+                        // Tạo cột thông tin người dùng
+                        const info = document.createElement('td');
+                        const info_str = document.createElement('span');
+                        info_str.classList.add("usr-email-addr");
+                        info_str.textContent = `${item.username}|${item.password}|${item.server}|+ `;
+                        const CHANGE = document.createElement('i');
+                        CHANGE.classList.add('fa', 'fa-key');
+                        CHANGE.setAttribute('aria-hidden', 'true');
+                        CHANGE.addEventListener('click', () => {
+                            console.log(item.username, item.password);
+                        });
+                        info_str.appendChild(CHANGE);
+                        info.appendChild(info_str);
+                        tr.appendChild(info);
+
+                        // Tạo cột thông tin item
+                        const ifITEM = document.createElement('td');
+                        const ifITEM_str = document.createElement('span');
+                        ifITEM_str.classList.add("usr-email-addr");
+
+                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power1)}</strong>` : formatNumber(item.Power1);
+                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
+                        const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
+                        const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
+                        let BarGold = "";
+                        if(item.admin == "admin1"){
+                             BarGold = item.msg || "";
+                        } else {
+                             BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
+                       
+
+                        ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
+                        ifITEM.appendChild(ifITEM_str);
+                        tr.appendChild(ifITEM);
+
+                        // Tạo cột thời gian
+                        const timeAGO = document.createElement('td');
+                        const timeAGO_str = document.createElement('span');
+                        timeAGO_str.classList.add("usr-email-addr");
+                        timeAGO_str.textContent = `${convertTimeStamp(item.timeNOW)}`;
+                        timeAGO.appendChild(timeAGO_str);
+                        tr.appendChild(timeAGO);
+
+                        // Tạo cột thông tin thiết bị, IP và số lượng
+                        const DEVICE_IP_AMOUNT = document.createElement('td');
+                        const DEVICE_IP_AMOUNT_str = document.createElement('span');
+                        DEVICE_IP_AMOUNT_str.classList.add("usr-email-addr");
+                        DEVICE_IP_AMOUNT_str.textContent = `${item.device.substring(14, 50)}|${item.ip}|${item.amount}`;
+                        DEVICE_IP_AMOUNT.appendChild(DEVICE_IP_AMOUNT_str);
+                        tr.appendChild(DEVICE_IP_AMOUNT);
+
+                        const PAYMENT = document.createElement('td');
+                        const PAYMENT_str = document.createElement('span');
+                        PAYMENT_str.classList.add("usr-email-addr");
+                        PAYMENT_str.textContent = `${item.bill}`;
+                        PAYMENT.appendChild(PAYMENT_str);
+                        tr.appendChild(PAYMENT);
+
+                        // Thêm tr vào tbody
+                        document.querySelector('tbody.rowUSER').appendChild(tr);
+                        STT++;
+                    });
+                    document.querySelector('strong.stt').innerText = `TOTAL_USER: ${STT}`;
+                    loading(false);
+                });
+                document.querySelector('h5.mb-0').appendChild(CLICK_01);
+
+                const CLICK_02 = document.createElement('h4');
+                CLICK_02.classList = "btn btn-sm btn-danger";
+                CLICK_02.innerHTML = `<strong> {02} </strong>`;
+                CLICK_02.addEventListener('click', async () => {
+                    loading(true);
+                    const resultDATA = await CURL('api/02', {
+                        authorization: localStorage.getItem('JWT')
+                    }, 'POST');
+                    if (!resultDATA.type) {
+                        loading(false);
+                        if (localStorage.getItem("JWT")) {
+                            localStorage.removeItem("JWT");
+                            console.log("JWT đã được xóa khỏi localStorage.");
+                        } else {
+                            console.log("JWT không tồn tại trong localStorage.");
+                        }
+                        CARD_LOGIN();
+                        return msg(resultDATA.type, resultDATA.msg);
+                    }
+                    document.querySelector('tbody.rowUSER').innerHTML = ``;
+                    let STT = 0;
+                    resultDATA.data.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const info = document.createElement('td');
+                        const info_str = document.createElement('span');
+                        info_str.classList.add("usr-email-addr");
+                        info_str.textContent = `${item.username}|${item.password}|${item.server}|+ `;
+                        info.appendChild(info_str);
+                        tr.appendChild(info);
+                        document.querySelector('tbody.rowUSER').appendChild(tr);
+                        STT++;
+                    });
+                    document.querySelector('strong.stt').innerText = `TOTAL_USER: ${STT}`;
+                    loading(false);
+
+                });
+                document.querySelector('h5.mb-0').appendChild(CLICK_02);
+
+                const CLICK_03 = document.createElement('h4');
+                CLICK_03.classList = "btn btn-sm btn-primary";
+                CLICK_03.innerHTML = ` {<i class="fa fa-paypal" aria-hidden="true"></i>/PAYMENT}`;
+                CLICK_03.addEventListener('click', async () => {
+    loading(true);
+    const dataPAYMENT = await CURL('api/PaymentUSER', {
+        authorization: localStorage.getItem('JWT') || ""
+    }, 'POST');
+    loading(false);
+
+    // Chuyển đổi chuỗi dữ liệu thành mảng
+    const soLuongArr = dataPAYMENT.quantity.split("|");
+    const sucManhArr = dataPAYMENT.POWER.split("|");
+    const giaArr = dataPAYMENT.PRICE.split("|");
+    const bangGiaArr = dataPAYMENT.PRICE2.split("|");
+
+    // Hàm để tạo nội dung tab động
+    function createTabContent(index) {
+        return `
+            <div class="payment-details">
+                <div class="form-group comparison-line">
+                    <label>Sức Mạnh:</label>
+                    <span>${sucManhArr[index]}</span>
+                </div>
+                <div class="form-group comparison-line">
+                    <label>Số Lượng:</label>
+                    <span>${soLuongArr[index]}</span>
+                </div>
+                <div class="form-group comparison-line">
+                    <label>Giá:</label>
+                    <span>${giaArr[index]}</span>
+                </div>
+                <div class="form-group comparison-line">
+                    <label>Bảng Giá:</label>
+                    <span>${formatNumber(bangGiaArr[index])}</span>
+                </div>
+                <div class="form-group total comparison-line">
+                    <label>Tổng Giá:</label>
+                    <span>${formatNumber(dataPAYMENT.totalMoney)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Tạo nội dung HTML cho các tab
+    let tabButtons = '';
+    let tabContents = '';
+    soLuongArr.forEach((_, index) => {
+        tabButtons += `<button class="tab-button" onclick="showTab(${index})">Tab ${sucManhArr[index]}</button>`;
+        tabContents += `<div id="tab-${index}" class="tab-content" style="display: none;">${createTabContent(index)}</div>`;
+    });
+
+    // Hiển thị SweetAlert với các tab
+    Swal.fire({
+        html: `
+            <div class="tab-container">
+                ${tabButtons}
+                ${tabContents}
+            </div>
+        `,
+        allowOutsideClick: false,
+        showCancelButton: true,
+        confirmButtonText: 'THANH TOÁN',
+        cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            const PAYMENT_SUCCESS = await CURL('api/PaymentUSER', {
+                authorization: localStorage.getItem('JWT') || "",
+                pay: true
+            }, 'POST');
+            msg(PAYMENT_SUCCESS.type, PAYMENT_SUCCESS.msg);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            console.log('User clicked Cancel');
+        }
+    });
+
+    // Hiển thị tab đầu tiên mặc định
+    showTab(0);
+});
+
+
+                document.querySelector('h5.mb-0').appendChild(CLICK_03);
+
+                const CLICK_05 = document.createElement('h4');
+                CLICK_05.classList = "btn btn-sm btn-warning";
+                CLICK_05.innerHTML = `<strong> {MyCharz POWER}</strong>`;
+                CLICK_05.addEventListener('click', async () => {
+                    loading(true);
+                    const resultDATA = await CURL('api/01', {
+                        authorization: localStorage.getItem('JWT')
+                    }, 'POST');
+                    if (!resultDATA.type) {
+                        loading(false);
+                        if (localStorage.getItem("JWT")) {
+                            localStorage.removeItem("JWT");
+                            console.log("JWT đã được xóa khỏi localStorage.");
+                        } else {
+                            console.log("JWT không tồn tại trong localStorage.");
+                        }
+                        CARD_LOGIN();
+                        return msg(resultDATA.type, resultDATA.msg);
+                    }
+                    document.querySelector('tbody.rowUSER').innerHTML = ``;
+                    let STT = 0;
+                    resultDATA.data.sort((a, b) => b.Power1 - a.Power1);
+                    resultDATA.data.forEach(item => {
+                    if(item.bill){
+                        return;
+                    }
+                        const tr = document.createElement('tr');
+                        const info = document.createElement('td');
+                        const info_str = document.createElement('span');
+                        info_str.classList.add("usr-email-addr");
+                        info_str.textContent = `${item.username}|${item.password}|${item.server}|+ `;
+                        const CHANGE = document.createElement('i');
+                        CHANGE.classList.add('fa', 'fa-key');
+                        CHANGE.setAttribute('aria-hidden', 'true');
+                        CHANGE.addEventListener('click', () => {
+                            console.log(item.username, item.password);
+                        });
+                        info_str.appendChild(CHANGE);
+                        info.appendChild(info_str);
+                        tr.appendChild(info);
+                        const ifITEM = document.createElement('td');
+                        const ifITEM_str = document.createElement('span');
+                        ifITEM_str.classList.add("usr-email-addr");
+                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power1)}</strong>` : formatNumber(item.Power1);
+                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
+                        const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
+                        const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
+                         let BarGold = "";
+                        if(item.admin == "admin1"){
+                             BarGold = item.msg || "";
+                        } else {
+                             BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
+                        ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
+                        ifITEM.appendChild(ifITEM_str);
+                        tr.appendChild(ifITEM);
+                        const timeAGO = document.createElement('td');
+                        const timeAGO_str = document.createElement('span');
+                        timeAGO_str.classList.add("usr-email-addr");
+                        timeAGO_str.textContent = `${convertTimeStamp(item.timeNOW)}`;
+                        timeAGO.appendChild(timeAGO_str);
+                        tr.appendChild(timeAGO);
+                        const DEVICE_IP_AMOUNT = document.createElement('td');
+                        const DEVICE_IP_AMOUNT_str = document.createElement('span');
+                        DEVICE_IP_AMOUNT_str.classList.add("usr-email-addr");
+                        DEVICE_IP_AMOUNT_str.textContent = `${item.device.substring(14, 50)}|${item.ip}|${item.amount}`;
+                        DEVICE_IP_AMOUNT.appendChild(DEVICE_IP_AMOUNT_str);
+                        tr.appendChild(DEVICE_IP_AMOUNT);
+                        const PAYMENT = document.createElement('td');
+                        const PAYMENT_str = document.createElement('span');
+                        PAYMENT_str.classList.add("usr-email-addr");
+                        PAYMENT_str.textContent = `${item.bill}`;
+                        PAYMENT.appendChild(PAYMENT_str);
+                        tr.appendChild(PAYMENT);
+                        document.querySelector('tbody.rowUSER').appendChild(tr);
+                        STT++;
+                    });
+                    document.querySelector('strong.stt').innerText = `TOTAL_USER: ${STT}`;
+                    loading(false);
+                });
+                document.querySelector('h5.mb-0').appendChild(CLICK_05);
+                ////////////////////////////////////////////////////////
+
+                const CLICK_06 = document.createElement('h4');
+                CLICK_06.classList = "btn btn-sm btn-warning";
+                CLICK_06.innerHTML = `<strong> {myPETz POWER}</strong>`;
+                CLICK_06.addEventListener('click', async () => {
+                    loading(true);
+                    const resultDATA = await CURL('api/01', {
+                        authorization: localStorage.getItem('JWT')
+                    }, 'POST');
+                    if (!resultDATA.type) {
+                        loading(false);
+                        if (localStorage.getItem("JWT")) {
+                            localStorage.removeItem("JWT");
+                            console.log("JWT đã được xóa khỏi localStorage.");
+                        } else {
+                            console.log("JWT không tồn tại trong localStorage.");
+                        }
+                        CARD_LOGIN();
+                        return msg(resultDATA.type, resultDATA.msg);
+                    }
+                    document.querySelector('tbody.rowUSER').innerHTML = ``;
+                    let STT = 0;
+                    resultDATA.data.sort((a, b) => b.Power2 - a.Power2);
+                    resultDATA.data.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const info = document.createElement('td');
+                        const info_str = document.createElement('span');
+                        info_str.classList.add("usr-email-addr");
+                        info_str.textContent = `${item.username}|${item.password}|${item.server}|+ `;
+                        const CHANGE = document.createElement('i');
+                        CHANGE.classList.add('fa', 'fa-key');
+                        CHANGE.setAttribute('aria-hidden', 'true');
+                        CHANGE.addEventListener('click', () => {
+                            console.log(item.username, item.password);
+                        });
+                        info_str.appendChild(CHANGE);
+                        info.appendChild(info_str);
+                        tr.appendChild(info);
+                        const ifITEM = document.createElement('td');
+                        const ifITEM_str = document.createElement('span');
+                        ifITEM_str.classList.add("usr-email-addr");
+                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power1)}</strong>` : formatNumber(item.Power1);
+                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
+                        const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
+                        const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
+                        let BarGold = "";
+                        if(item.admin == "admin1"){
+                             BarGold = item.msg || "";
+                        } else {
+                             BarGold = (item.admin != "ntd") ? `Gold: ${item.BarGold}` : "";
+                        }
+                        ifITEM_str.innerHTML = `${power1Formatted}🔴${power2Formatted} >: ${RedPorota} | ${gemFormatted} | ${BarGold}`;
+                        ifITEM.appendChild(ifITEM_str);
+                        tr.appendChild(ifITEM);
+                        const timeAGO = document.createElement('td');
+                        const timeAGO_str = document.createElement('span');
+                        timeAGO_str.classList.add("usr-email-addr");
+                        timeAGO_str.textContent = `${convertTimeStamp(item.timeNOW)}`;
+                        timeAGO.appendChild(timeAGO_str);
+                        tr.appendChild(timeAGO);
+                        const DEVICE_IP_AMOUNT = document.createElement('td');
+                        const DEVICE_IP_AMOUNT_str = document.createElement('span');
+                        DEVICE_IP_AMOUNT_str.classList.add("usr-email-addr");
+                        DEVICE_IP_AMOUNT_str.textContent = `${item.device.substring(14, 50)}|${item.ip}|${item.amount}`;
+                        DEVICE_IP_AMOUNT.appendChild(DEVICE_IP_AMOUNT_str);
+                        tr.appendChild(DEVICE_IP_AMOUNT);
+                        const PAYMENT = document.createElement('td');
+                        const PAYMENT_str = document.createElement('span');
+                        PAYMENT_str.classList.add("usr-email-addr");
+                        PAYMENT_str.textContent = `${item.bill}`;
+                        PAYMENT.appendChild(PAYMENT_str);
+                        tr.appendChild(PAYMENT);
+                        document.querySelector('tbody.rowUSER').appendChild(tr);
+                        STT++;
+                    });
+                    document.querySelector('strong.stt').innerText = `TOTAL_USER: ${STT}`;
+                    loading(false);
+                });
+                document.querySelector('h5.mb-0').appendChild(CLICK_06);
+
+
+                ////////////////////////////////////////////////////////
+                const CARD_ROW = document.createElement('div');
+                CARD_ROW.classList.add("body-wrapper");
+
+                const CARD_ROW_01 = document.createElement('div');
+                CARD_ROW.appendChild(CARD_ROW_01);
+
+                const CARD_ROW_02 = document.createElement('div');
+                CARD_ROW_02.classList.add("widget-content", "searchable-container", "list");
+                CARD_ROW_01.appendChild(CARD_ROW_02);
+
+                const CARD_ROW_03 = document.createElement('div');
+                CARD_ROW_03.classList.add("card", "card-body");
+                CARD_ROW_03.id = "rowUSERlist";
+                CARD_ROW_02.appendChild(CARD_ROW_03);
+
+                const CARD_ROW_04 = document.createElement('div');
+                CARD_ROW_04.classList.add("table-responsive");
+                CARD_ROW_04.innerHTML = `<strong class="stt"></strong>`;
+                CARD_ROW_03.appendChild(CARD_ROW_04);
+
+                const CARD_ROW_05 = document.createElement('table');
+                CARD_ROW_05.classList.add("table", "search-table", "align-middle", "text-nowrap");
+                CARD_ROW_04.appendChild(CARD_ROW_05);
+
+                const CARD_ROW_06 = document.createElement('thead');
+                CARD_ROW_06.classList.add("header-item");
+                CARD_ROW_05.appendChild(CARD_ROW_06);
+
+                const CARD_ROW_07 = document.createElement('tbody');
+                CARD_ROW_07.classList = "rowUSER";
+                CARD_ROW_05.appendChild(CARD_ROW_07);
+
+                // Thêm vào phần tử title
+                title.appendChild(CARD_ROW);
+                getINFO_USER();
+                /////////////////////////////////////////////////////////
+            });
+
+        const CARD_LOGIN = async() => {
+            Swal.fire({
+                html: `<div id="FORM"></div>`,
+                allowOutsideClick: false,
+            }).then(async(result) => {
+                if (result.isConfirmed) {
+                    const USER = document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[0].value || "";
+                    const PASS = document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[1].value || "";
+                    const OTP = document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[2].value || "";
+                    if (!USER || !PASS || !OTP) {
+                        return CARD_LOGIN();
+                    } else {
+                        const Login = await CURL('api/Login', {
+                            user: USER,
+                            pass: PASS,
+                            OTP: OTP
+                        }, 'POST');
+                        if (Login.type) {
+                            localStorage.setItem("JWT", Login.JWT);
+                            getINFO_USER();
+                            return msg(Login.type, Login.msg);
+                        } else {
+                            CARD_LOGIN();
+                            if (localStorage.getItem("JWT")) {
+                                localStorage.removeItem("JWT");
+                            } 
+                            return msg(Login.type, Login.msg);
+                        }
+                    }
+                }
+            });
+            // Tạo thẻ form
+            const FORM = document.createElement('form');
+            FORM.classList = "space-y-3";
+            document.getElementById('FORM').appendChild(FORM);
+
+            // Tạo thẻ div đầu tiên chứa input user
+            const FORM_DIV01 = document.createElement('div');
+            FORM_DIV01.classList = "mb-3";
+            FORM.appendChild(FORM_DIV01);
+            const InputUSER = document.createElement('input');
+            InputUSER.classList = "form-control";
+            InputUSER.placeholder = "input USERNAME";
+            FORM_DIV01.appendChild(InputUSER);
+
+            // Tạo thẻ div thứ hai chứa input pass
+            const FORM_DIV02 = document.createElement('div');
+            FORM_DIV02.classList = "mb-3";
+            FORM.appendChild(FORM_DIV02);
+            const InputPASS = document.createElement('input');
+            InputPASS.classList = "form-control";
+            InputPASS.placeholder = "input PASSWORD";
+            InputPASS.type = "password";
+            FORM_DIV02.appendChild(InputPASS);
+
+            // Tạo thẻ div thứ ba chứa input OTP và button
+            const FORM_DIV03 = document.createElement('div');
+            FORM_DIV03.classList = "mb-3 d-flex align-items-center";
+            FORM.appendChild(FORM_DIV03);
+            const InputOTP = document.createElement('input');
+            InputOTP.classList = "form-control me-2";
+            InputOTP.placeholder = "input OTP";
+            InputOTP.disabled = true;
+            FORM_DIV03.appendChild(InputOTP);
+
+            const confirmOTP = document.createElement('button');
+            confirmOTP.type = "button";
+            confirmOTP.classList = "btn btn-sm btn-success";
+            confirmOTP.innerText = "GET OTP";
+            confirmOTP.addEventListener('click', async() => {
+                confirmOTP.innerHTML = '';
+                confirmOTP.innerHTML = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>';
+
+                const getOTP = await CURL('api/getOTP', {
+                    user: document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[0].value || "",
+                    pass: document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[1].value || "",
+                    COOKIE: document.querySelectorAll('form.space-y-3')[0].querySelectorAll('input')[3].value || ""
+                }, 'POST');
+                if (getOTP.type) {
+                    InputOTP.disabled = false;
+                    msg(getOTP.type, getOTP.msg);
+                    confirmOTP.innerHTML = '<i class="fa fa-check" aria-hidden="true"></i>';
+                } else {
+                    msg(getOTP.type, getOTP.msg);
+                    confirmOTP.innerText = "Lấy OTP";
+                }
+            });
+            FORM_DIV03.appendChild(confirmOTP);
+
+            // Tạo thẻ div thứ hai chứa input pass
+            const CODE_VERIFY = document.createElement('div');
+            CODE_VERIFY.classList = "mb-3";
+            FORM.appendChild(CODE_VERIFY);
+            const InputCODE_VERIFY = document.createElement('input');
+            InputCODE_VERIFY.classList = "form-control";
+            InputCODE_VERIFY.placeholder = "InputCODE_VERIFY";
+            InputCODE_VERIFY.type = "password";
+            CODE_VERIFY.appendChild(InputCODE_VERIFY);
+            confirmOTP.appendChild(confirmOTP);
+
+            
+        }
+    </script>
+
+</body>
+
+</html>
+<style>
+    .d-flex {
+        display: flex;
+    }
+    
+    .align-items-center {
+        align-items: center;
+    }
+    
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+</style>
