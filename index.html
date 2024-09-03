@@ -1,4 +1,5 @@
 
+
 {v2.0}
 <!DOCTYPE html>
 <html lang="en">
@@ -100,6 +101,7 @@
 .form-group span {
     color: #333;
 }
+
     </style>
     <script>
         const http = 'https://';
@@ -392,57 +394,76 @@ function formatNumber(number) {
         authorization: localStorage.getItem('JWT') || ""
     }, 'POST');
     loading(false);
+    
+console.table(dataPAYMENT.data);
+let aMOUNTPay = 0;
+// Ensure dataPAYMENT.dataPay is defined and is an array
+if (Array.isArray(dataPAYMENT.dataPay)) {
 
-    // Chuyển đổi chuỗi dữ liệu thành mảng
-    const soLuongArr = dataPAYMENT.quantity.split("|");
-    const sucManhArr = dataPAYMENT.POWER.split("|");
-    const giaArr = dataPAYMENT.PRICE.split("|");
-    const bangGiaArr = dataPAYMENT.PRICE2.split("|");
-
-    // Hàm để tạo nội dung tab động
-    function createTabContent(index) {
-        return `
-            <div class="payment-details">
-                <div class="form-group comparison-line">
-                    <label>Sức Mạnh:</label>
-                    <span>${sucManhArr[index]}</span>
-                </div>
-                <div class="form-group comparison-line">
-                    <label>Số Lượng:</label>
-                    <span>${soLuongArr[index]}</span>
-                </div>
-                <div class="form-group comparison-line">
-                    <label>Giá:</label>
-                    <span>${giaArr[index]}</span>
-                </div>
-                <div class="form-group comparison-line">
-                    <label>Bảng Giá:</label>
-                    <span>${formatNumber(bangGiaArr[index])}</span>
-                </div>
-                <div class="form-group total comparison-line">
-                    <label>Tổng Giá:</label>
-                    <span>${formatNumber(dataPAYMENT.totalMoney)}</span>
-                </div>
-            </div>
-        `;
-    }
-
-    // Tạo nội dung HTML cho các tab
-    let tabButtons = '';
-    let tabContents = '';
-    soLuongArr.forEach((_, index) => {
-        tabButtons += `<button class="tab-button" onclick="showTab(${index})">Tab ${sucManhArr[index]}</button>`;
-        tabContents += `<div id="tab-${index}" class="tab-content" style="display: none;">${createTabContent(index)}</div>`;
+    dataPAYMENT.dataPay.forEach(result => {
+        aMOUNTPay += result.updateOne.update.$set.amount;
     });
+
+    const tableData = dataPAYMENT.dataPay.map(result => ({
+        filter: JSON.stringify(result.updateOne.filter),
+        amount: result.updateOne.update.$set.amount
+    }));
+
+    // Display the data in a table format
+    console.table(tableData);
+    console.log(`Đã tính: `, aMOUNTPay);
+} else {
+    console.error('dataPAYMENT.dataPay is not an array or is undefined');
+}
+
+
+// Generate HTML table rows
+const tableRows = dataPAYMENT.data.map(item => `
+    <tr>
+        <td>${formatNumber(item.limit)}</td>
+        <td>${formatNumber(item.price)}</td>
+        <td>${(item.count)}</td>
+        <td>${formatNumber(item.price * item.count)}</td>
+    </tr>
+`).join('');
+
+// Generate HTML table
+const tableHTML = `
+    <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Sức Mạnh</th>
+                <th>Giá Tài Khoản</th>
+                <th>Số Lượng</th>
+                <th>Tổng Giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${tableRows}
+        </tbody>
+    </table>
+`;
 
     // Hiển thị SweetAlert với các tab
     Swal.fire({
         html: `
-            <div class="">
-                ${tabButtons}
-                ${tabContents}
-            </div>
+                        <div class="payment-details">
+                    <div class="form-group">
+                        <label>Bảng Giá:</label>
+                        <span>${tableHTML}</span>
+                    </div>
+                    <div class="form-group total">
+                        <label>Tổng Giá Server:</label>
+                        <span>${formatNumber(dataPAYMENT.total)}</span>
+                    </div>
+                                    <div class="form-group total">
+                        <label>Tổng Giá SYSTEM:</label>
+                        <span>${formatNumber(aMOUNTPay)}</span>
+                    </div>
+                    </div>
         `,
+            width: '600px', // Adjust width as needed
+    padding: '20px',
         allowOutsideClick: false,
         showCancelButton: true,
         confirmButtonText: 'THANH TOÁN',
@@ -489,9 +510,14 @@ function formatNumber(number) {
                     let STT = 0;
                     resultDATA.data.sort((a, b) => b.Power1 - a.Power1);
                     resultDATA.data.forEach(item => {
-                    if(item.bill){
-                        return;
-                    }
+                        if(item.bill){
+                            return;
+                        }
+                        // if((item.Power1 >= 40000000000 && item.Power1 <= 44999999999 || item.Power2 >= 40000000000 && item.Power2 <= 44999999999)){
+                          
+                        // } else {
+                        //     return;
+                        // }
                         const tr = document.createElement('tr');
                         const info = document.createElement('td');
                         const info_str = document.createElement('span');
