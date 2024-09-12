@@ -313,8 +313,8 @@ function formatNumber(number) {
                         const ifITEM_str = document.createElement('span');
                         ifITEM_str.classList.add("usr-email-addr");
 
-                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${number_format123(item.Power1)}</strong>` : formatNumber(item.Power1);
-                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${number_format123(item.Power2)}</strong>` : formatNumber(item.Power2);
+                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power1)}</strong>` : formatNumber(item.Power1);
+                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
                         const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
                         const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
                         let BarGold = "";
@@ -549,8 +549,8 @@ const tableHTML = `
                         const ifITEM = document.createElement('td');
                         const ifITEM_str = document.createElement('span');
                         ifITEM_str.classList.add("usr-email-addr");
-                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${number_format123(item.Power1)}</strong>` : formatNumber(item.Power1);
-                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${number_format123(item.Power2)}</strong>` : formatNumber(item.Power2);
+                        const power1Formatted = item.Power1 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power1)}</strong>` : formatNumber(item.Power1);
+                        const power2Formatted = item.Power2 >= 39999999999 ? `<strong style='color:red'>${formatNumber(item.Power2)}</strong>` : formatNumber(item.Power2);
                         const gemFormatted = (item.admin != "ntd") ? "GEM: " + (item.GEM > 999 ? `<strong style='color:red'>${item.GEM}</strong>` : item.GEM) : "";
                         const RedPorota = (item.admin != "ntd") ? (item.Potora == 'True' || item.Potora == 'true') ? `<strong style='color:red'>True</strong>` : `False` : "";
                          let BarGold = "";
