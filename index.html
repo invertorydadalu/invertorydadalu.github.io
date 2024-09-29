@@ -1,5 +1,6 @@
 
 
+
 {v2.0}
 <!DOCTYPE html>
 <html lang="en">
@@ -266,6 +267,37 @@ function formatNumber(number) {
                 const title02 = document.createElement('div');
                 title02.innerHTML = ' <h5 class="mb-0">[CARD INFO]  : </h5>';
                 title01.appendChild(title02);
+
+                const rechargeTOPUP = document.createElement('h4');
+                rechargeTOPUP.classList = "btn btn-sm_table btn-warning";
+                rechargeTOPUP.innerHTML = `<strong> {CARD TOPUP} </strong>`;
+                rechargeTOPUP.addEventListener('click', async() => {
+                    Swal.fire({
+                        html: `<form>
+                            <div class="form-group">
+                                <label>Nhập Mã PayCard</label>
+                                <input type="text" class="form-control" id="PayCard" placeholder="CODE PayCard">
+                            </div>
+                            </form>`,
+                        allowOutsideClick: false,
+                    }).then(async(result) => {
+                        if (result.isConfirmed) {
+                            const CODE = document.getElementById('PayCard').value || "";
+                            console.log(CODE);
+                            if (!CODE) {
+                                msg(false, "Vui lòng nhập mã PayCard");
+                            } else {
+                                const PayCard = await CURL('api/PayCard', {
+                                    code: CODE,
+                                    authorization: localStorage.getItem("JWT")
+                                }, 'POST');
+                                msg(PayCard.type, PayCard.msg);
+                            }
+                        }
+                    });
+                });
+                document.querySelector('h5.mb-0').appendChild(rechargeTOPUP);
+
 
                 const CLICK_01 = document.createElement('h4');
                 CLICK_01.classList = "btn btn-sm btn-success";
